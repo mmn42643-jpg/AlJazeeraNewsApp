@@ -1,70 +1,54 @@
-// server.js
-require('dotenv').config();
-const express = require('express');
-const fetch = require('node-fetch');
-const cors = require('cors');
-const app = express();
-const PORT = process.env.PORT || 3000;
+import express from "express";
+import cors from "cors";
+import Parser from "rss-parser";
+import dotenv from "dotenv";
+import { Client } from "youtubei.js";
 
+dotenv.config();
+
+const app = express();
 app.use(cors());
 app.use(express.json());
 
-// متغيرات البيئة
-const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
-const CHANNEL_ID = process.env.CHANNEL_ID;
-const ALJAZEERA_RSS = process.env.ALJAZEERA_RSS;
+const PORT = process.env.PORT || 3000;
+const YT_API_KEY = process.env.YOUTUBE_API_KEY;
 
-// ---------------------------------
-// جلب الأخبار من RSS قناة الجزيرة
-const Parser = require('rss-parser');
 const parser = new Parser();
+const ytClient = new Client();
 
-app.get('/politics', async (req, res) => {
+// جلب الأخبار السياسية (مثال على قناة الجزيرة)
+app.get("/politics", async (req, res) => {
   try {
-    const feed = await parser.parseURL(ALJAZEERA_RSS);
+    const feed = await parser.parseURL("https://www.aljazeera.net/aljazeera.rss"); 
     const items = feed.items.map(item => ({
       title: item.title,
       link: item.link,
-      desc: item.contentSnippet || item.content || '',
-      img: item.enclosure?.url || null
+      desc: item.contentSnippet,
+      img: item.enclosure?.url || ""
     }));
     res.json(items);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'تعذر جلب الأخبار' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "تعذر جلب الأخبار" });
   }
 });
 
-// ---------------------------------
-// جلب آخر فيديوهات يوتيوب للقناة
-app.get('/youtube', async (req, res) => {
+// جلب فيديوهات يوتيوب للقناة
+app.get("/youtube", async (req, res) => {
   try {
-    const url = `https://www.googleapis.com/youtube/v3/search?key=${YOUTUBE_API_KEY}&channelId=${CHANNEL_ID}&part=snippet,id&order=date&maxResults=10`;
-    const response = await fetch(url);
-    const data = await response.json();
-    const videos = data.items
-      .filter(item => item.id.kind === 'youtube#video')
-      .map(item => ({
-        title: item.snippet.title,
-        link: `https://www.youtube.com/watch?v=${item.id.videoId}`,
-        vid: item.id.videoId,
-        img: item.snippet.thumbnails.high.url,
-        desc: item.snippet.description
-      }));
-    res.json(videos);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'تعذر جلب فيديوهات اليوتيوب' });
+    const channelId = "UCXIJgqnII2ZOINSWNOGFThA"; // قناة الجزيرة على YouTube
+    const videos = await ytClient.getChannel(channelId).then(ch => ch.videos.slice(0, 10));
+    const items = videos.map(v => ({
+      title: v.title,
+      vid: v.id,
+      desc: v.description,
+      img: v.thumbnails[0]?.url || ""
+    }));
+    res.json(items);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: "تعذر جلب فيديوهات اليوتيوب" });
   }
 });
 
-// ---------------------------------
-// صفحة رئيسية
-app.get('/', (req, res) => {
-  res.send('خدمة الأخبار تعمل بنجاح');
-});
-
-// ---------------------------------
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
