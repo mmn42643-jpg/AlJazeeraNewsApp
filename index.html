@@ -1,29 +1,35 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>أخبار الجزيرة – آخر الأخبار السياسية</title>
-    <link rel="stylesheet" href="css/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>أخبار الجزيرة</title>
+  <link rel="stylesheet" href="css/style.css" />
 </head>
-
 <body>
+  <header id="header">
+    <h1>أخبار الجزيرة</h1>
+    <button id="themeToggle">🌙</button>
+  </header>
 
-    <!-- العنوان -->
-    <header>
-        <h1>أخبار الجزيرة السياسية</h1>
-        <p>آخر الأخبار + أحدث فيديوهات الجزيرة</p>
-    </header>
+  <nav>
+    <button class="tab active" data-tab="politics">السياسة</button>
+    <button class="tab" data-tab="youtube">يوتيوب</button>
+    <button class="tab" data-tab="favorites">المفضلة</button>
+    <button id="refreshBtn">🔄 تحديث</button>
+  </nav>
 
-    <!-- قسم الأخبار -->
-    <section id="news"></section>
+  <main>
+    <section id="politics" class="tab-content active"></section>
+    <section id="youtube" class="tab-content"></section>
+    <section id="favorites" class="tab-content"></section>
+  </main>
 
-    <!-- قسم الفيديوهات -->
-    <section id="videos">
-        <h2>فيديوهات الجزيرة</h2>
-        <div id="video-list"></div>
-    </section>
+  <div id="articlePage" class="hidden" aria-hidden="true">
+    <button id="closeArticle">✖</button>
+    <div id="articleContent"></div>
+  </div>
 
-    <script src="assets/app.js"></script>
+  <script src="js/script.js"></script>
 </body>
 </html>
