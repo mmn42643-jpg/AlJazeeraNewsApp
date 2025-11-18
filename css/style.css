@@ -1,32 +1,16 @@
-body {
-    font-family: sans-serif;
-    background: #f7f7f7;
-    margin: 0;
-    padding: 0;
-    direction: rtl;
-}
-
-header {
-    background: #0088cc;
-    color: white;
-    padding: 20px;
-    text-align: center;
-}
-
-#news, #video-list {
-    padding: 10px 20px;
-}
-
-.article, .video-card {
-    background: #fff;
-    padding: 15px;
-    margin: 12px 0;
-    border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.video-card iframe {
-    width: 100%;
-    height: 220px;
-    border-radius: 10px;
-}
+body { font-family: Arial, sans-serif; margin:0; background:#f4f4f4; color:#333; transition:0.3s; }
+body.dark{ background:#222; color:#eee; }
+header{ display:flex; justify-content:space-between; align-items:center; padding:1rem; background:#c00; color:#fff; }
+nav{ display:flex; gap:1rem; padding:0.5rem; }
+nav button{ padding:0.5rem 1rem; cursor:pointer; }
+.tab-content{ display:none; padding:1rem; }
+.tab-content.active{ display:block; }
+.card{ border:1px solid #ccc; margin-bottom:1rem; border-radius:5px; background:#fff; overflow:hidden; }
+.card img{ width:100%; height:auto; }
+.card-body{ padding:0.5rem 1rem; }
+.card-buttons{ display:flex; justify-content:flex-end; gap:0.5rem; padding:0.5rem 1rem; }
+button.favorite-btn.active{ color:gold; }
+#articlePage{ position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:flex; justify-content:center; align-items:center; color:#fff; z-index:1000; }
+#articlePage.hidden{ display:none; }
+#articleContent{ background:#000; padding:1rem; max-width:800px; max-height:90%; overflow-y:auto; }
+.youtube-player{ width:100%; height:400px; }
