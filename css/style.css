@@ -3,26 +3,42 @@
   --muted: rgba(0,0,0,0.6);
   --radius:12px;
 }
-@media (prefers-color-scheme: dark){
-  :root { --bg:#0f1113; --text:#eee; --card:#181a1b; --accent:#1a73e8; --muted: rgba(255,255,255,0.7); }
+.dark{
+  --bg:#0f1113; --text:#eee; --card:#181a1b; --accent:#1a73e8; --muted: rgba(255,255,255,0.7);
 }
-.dark { --bg:#0f1113; --text:#eee; --card:#181a1b; --accent:#1a73e8; --muted: rgba(255,255,255,0.7); }
 
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;font-family:Tajawal, Tahoma, Arial, sans-serif; background:var(--bg); color:var(--text); direction:rtl; font-size:16px; transition:background .18s,color .18s}
-.app{min-height:100vh;display:flex;flex-direction:column}
+body{
+  margin:0;
+  font-family:Tajawal, Tahoma, Arial, sans-serif;
+  background: var(--bg) url('img/page-bg.jpg') center/cover fixed no-repeat;
+  color: var(--text);
+  direction:rtl;
+  font-size:16px;
+  transition: background .18s, color .18s;
+}
+
+.header{
+  background: var(--accent) url('img/header-bg.jpg') center/cover no-repeat;
+  color:#fff;
+  padding:12px 14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
 /* سبلاش */
-.splash{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--bg);z-index:9999}
-.loader{width:46px;height:46px;border:5px solid #e6e6e6;border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.splash p{margin-top:10px;color:var(--muted)}
-
-/* هيدر */
-.header{background:var(--accent); color:#fff; padding:12px 14px; display:flex; justify-content:space-between; align-items:center}
-.app-title{margin:0;font-size:20px}
-.top-buttons button{margin-left:8px;padding:6px 8px;border-radius:10px;border:0;background:rgba(255,255,255,0.12);color:#fff;cursor:pointer}
+.splash{
+  position:fixed; inset:0; display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  background:var(--bg); z-index:9999;
+}
+.loader{
+  width:46px; height:46px;
+  border:5px solid #e6e6e6; border-top-color:var(--accent); border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+.splash p{margin-top:10px;color:var(--muted);}
 
 /* تبويبات */
 .tabs{display:flex;background:var(--accent);position:sticky;top:0;z-index:10}
