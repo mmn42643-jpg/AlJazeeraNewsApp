@@ -1,8 +1,7 @@
-// server.js (كامل)
+// server.js (محدث)
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import Parser from "rss-parser";
 import fetch from "node-fetch";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -19,62 +18,30 @@ app.use(express.json());
 // Serve static files from project root (index.html, css/, assets/, img/)
 app.use(express.static(path.join(__dirname)));
 
-// RSS parser
-const rss = new Parser({
-  // optional custom fields if needed
-});
-
-// Helper to choose RSS URL for a tab
-function getRssUrlForTab(tab) {
-  if (tab === "politics") return process.env.RSS_POLITICS || process.env.RSS_URL;
-  if (tab === "breaking") return process.env.RSS_BREAKING || process.env.RSS_URL;
-  if (tab === "aljazeera") return process.env.RSS_ALJAZEERA || process.env.RSS_URL;
-  return process.env.RSS_URL;
-}
-
-// Extract an image URL from item (best-effort)
-function extractImage(item) {
-  if (!item) return null;
-  if (item.enclosure && item.enclosure.url) return item.enclosure.url;
-  if (item["media:content"] && item["media:content"]["$"] && item["media:content"]["$"].url) return item["media:content"]["$"].url;
-  if (item["media:thumbnail"] && item["media:thumbnail"].url) return item["media:thumbnail"].url;
-  // try to find img src in content
-  const html = item.content || item["content:encoded"] || "";
-  const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
-  if (m) return m[1];
-  return null;
-}
-
-// Endpoint: get news by tab (politics, breaking, aljazeera)
-app.get("/news/:tab", async (req, res) => {
+// Endpoint: get news by category (politics, breaking, aljazeera)
+app.get("/news/:category", async (req, res) => {
   try {
-    const tab = req.params.tab || "politics";
-    const rssUrl = getRssUrlForTab(tab);
-    if (!rssUrl) return res.status(400).json({ error: "RSS URL غير موجود. ضع RSS في متغيرات البيئة." });
-    const feed = await rss.parseURL(rssUrl);
-    // Map to lighter JSON and remove duplicates by link
-    const seen = new Set();
-    const items = (feed.items || []).map(it => {
-      const img = extractImage(it);
-      return {
-        title: it.title || "",
-        link: it.link || it.guid || "",
-        pubDate: it.pubDate || it.isoDate || "",
-        contentSnippet: it.contentSnippet || (it.content || "").replace(/<[^>]*>/g, "").slice(0, 220),
-        content: it.content || it["content:encoded"] || "",
-        img: img,
-        source: feed.title || ""
-      };
-    }).filter(i => {
-      if (!i.link) return false;
-      if (seen.has(i.link)) return false;
-      seen.add(i.link);
-      return true;
-    }).slice(0, 40); // limit
-    res.json(items);
+    const cat = req.params.category;
+
+    let rssUrl =
+      cat === "politics" ? process.env.RSS_POLITICS :
+      cat === "breaking" ? process.env.RSS_BREAKING :
+      cat === "aljazeera" ? process.env.RSS_ALJAZEERA :
+      null;
+
+    if (!rssUrl) return res.json({ error: "قسم غير معروف" });
+
+    const response = await fetch(rssUrl);
+    const data = await response.json();
+
+    if (!data.items) {
+      return res.json({ error: "لم يتم العثور على أخبار" });
+    }
+
+    res.json(data.items);
   } catch (err) {
-    console.error("RSS error:", err);
-    res.status(500).json({ error: "تعذر جلب الأخبار" });
+    console.error("News fetch error:", err);
+    res.json({ error: "تعذر جلب الأخبار" });
   }
 });
 
