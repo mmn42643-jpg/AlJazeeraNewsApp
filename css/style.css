@@ -1,12 +1,30 @@
-body { font-family: Arial, sans-serif; font-size:16px; margin:0; padding:0; }
-header { background-color: #b00; color:#fff; padding:10px; display:flex; justify-content:space-between; align-items:center; }
-nav { display:flex; background:#eee; }
-nav button { flex:1; padding:10px; border:none; cursor:pointer; }
-nav button.active { background:#b00; color:#fff; }
-.tab-content { display:none; padding:10px; }
-.tab-content.active { display:block; }
-.card { border:1px solid #ccc; margin:10px 0; padding:10px; }
-.card img { max-width:100%; }
-.card-buttons { display:flex; justify-content:space-between; margin-top:10px; }
-.hidden { display:none; }
-.youtube-player { width:100%; height:400px; }
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f4f4f4;
+  color: #333;
+}
+
+header {
+  background: #005baa;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 1rem;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+main {
+  padding: 1rem;
+}
