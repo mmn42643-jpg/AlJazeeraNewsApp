@@ -14,18 +14,19 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // تقديم ملفات الواجهة الأمامية
-app.use(express.static(path.join(__dirname, 'assets')));
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
+app.use('/css', express.static(path.join(__dirname, 'css')));
 
-// مسار الصفحة الرئيسية
+// الصفحة الرئيسية
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'assets', 'index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // API لجلب أخبار RSS
 app.get('/politics', async (req, res) => {
   try {
     const parser = new RSSParser();
-    const feed = await parser.parseURL(process.env.RSS_URL); // ضع رابط RSS في ملف .env
+    const feed = await parser.parseURL(process.env.RSS_URL);
     res.json(feed.items);
   } catch (error) {
     console.error(error);
