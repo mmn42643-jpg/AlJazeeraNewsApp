@@ -1,51 +1,45 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import Parser from "rss-parser";
-import { Client } from "youtubei.js";
+import { Innertube } from "youtubei.js";
+import dotenv from "dotenv";
 
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const parser = new Parser();
+const youtube = await Innertube.create();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static("")); // ليتمكن من تقديم index.html وملفات CSS/JS
+app.use(express.static("")); // لخدمة ملفات index.html و assets و css
 
-// RSS parser
-const rssParser = new Parser();
+app.get("/", (req, res) => {
+  res.sendFile("index.html", { root: "." });
+});
 
-// Route for RSS news
-app.get("/news", async (req, res) => {
+app.get("/politics", async (req, res) => {
   try {
-    const feed = await rssParser.parseURL(process.env.RSS_URL);
-    res.json(feed.items);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "تعذر جلب الأخبار" });
+    const feed = await parser.parseURL(process.env.RSS_URL);
+    res.json(feed.items.slice(0, 10));
+  } catch (err) {
+    res.json({ error: "تعذر جلب الأخبار" });
   }
 });
 
-// Route for YouTube videos
 app.get("/youtube", async (req, res) => {
   try {
-    const client = new Client();
-    const channelId = process.env.CHANNEL_ID;
-    const channel = await client.getChannel(channelId);
-    const videos = channel.videos.map(video => ({
-      title: video.title,
-      url: `https://www.youtube.com/watch?v=${video.id}`,
-      thumbnail: video.thumbnails[0].url
+    const channel = await youtube.getChannel(process.env.YOUTUBE_CHANNEL_ID);
+    const videos = channel.videos.slice(0, 10).map(v => ({
+      title: v.title,
+      url: `https://www.youtube.com/watch?v=${v.id}`,
+      thumbnail: v.thumbnails[0].url
     }));
     res.json(videos);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "تعذر جلب فيديوهات اليوتيوب" });
+  } catch (err) {
+    res.json({ error: "تعذر جلب فيديوهات اليوتيوب" });
   }
 });
 
-// Start server
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
