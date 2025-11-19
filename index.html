@@ -8,13 +8,11 @@
 </head>
 <body>
   <div id="app" class="app">
-    <!-- سبلاش -->
     <div id="splash" class="splash">
       <div class="loader"></div>
       <p>جاري التحميل...</p>
     </div>
 
-    <!-- هيدر -->
     <header id="header" class="header">
       <h1 class="app-title">أخبار</h1>
       <div class="top-buttons">
@@ -25,7 +23,6 @@
       </div>
     </header>
 
-    <!-- تبويبات -->
     <nav class="tabs" role="tablist">
       <button class="tab active" data-tab="politics">أخبار سياسية</button>
       <button class="tab" data-tab="breaking">أخبار عاجلة</button>
@@ -33,11 +30,8 @@
       <button class="tab" data-tab="favorites">المفضلة</button>
     </nav>
 
-    <!-- محتوى -->
     <main class="main">
       <section id="list" class="list" aria-live="polite"></section>
-
-      <!-- صفحة المقال / مشغل -->
       <section id="articlePage" class="article hidden" aria-hidden="true">
         <button id="closeArticle" class="backBtn">رجوع</button>
         <div id="articleContent"></div>
@@ -49,7 +43,7 @@
     </footer>
   </div>
 
-  <script src="assets/script.js"></script>
+  <script src="assets/helpers.js"></script>
   <script src="assets/app.js"></script>
 </body>
 </html>
