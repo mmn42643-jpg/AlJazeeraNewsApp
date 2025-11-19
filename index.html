@@ -1,25 +1,55 @@
-<!DOCTYPE html>
-<html lang="ar">
+<!doctype html>
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Al Jazeera News App</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>أخبار - مهند ظاهر</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header>
-    <h1>خدمة الأخبار تعمل بنجاح</h1>
-    <nav>
-      <button data-tab="politics">سياسة</button>
-      <button data-tab="sports">رياضة</button>
-      <button data-tab="technology">تكنولوجيا</button>
-      <button data-tab="youtube">يوتيوب</button>
+  <div id="app" class="app">
+    <!-- سبلاش -->
+    <div id="splash" class="splash">
+      <div class="loader"></div>
+      <p>جاري التحميل...</p>
+    </div>
+
+    <!-- هيدر -->
+    <header id="header" class="header">
+      <h1 class="app-title">أخبار</h1>
+      <div class="top-buttons">
+        <button id="themeToggle" title="وضع">🌙</button>
+        <button id="fontPlus" title="تكبير الخط">A+</button>
+        <button id="fontMinus" title="تصغير الخط">A-</button>
+        <button id="refreshBtn" title="تحديث">🔄</button>
+      </div>
+    </header>
+
+    <!-- تبويبات -->
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="politics">أخبار سياسية</button>
+      <button class="tab" data-tab="breaking">أخبار عاجلة</button>
+      <button class="tab" data-tab="aljazeera">أخبار قناة الجزيرة</button>
+      <button class="tab" data-tab="favorites">المفضلة</button>
     </nav>
-  </header>
-  <main id="content">
-    <p>اختر قسمًا لعرض الأخبار</p>
-  </main>
-  <script src="assets/app.js"></script>
+
+    <!-- محتوى -->
+    <main class="main">
+      <section id="list" class="list" aria-live="polite"></section>
+
+      <!-- صفحة المقال / مشغل -->
+      <section id="articlePage" class="article hidden" aria-hidden="true">
+        <button id="closeArticle" class="backBtn">رجوع</button>
+        <div id="articleContent"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      © جميع الحقوق محفوظة لـِ مهند ظاهر 2025 <span class="circ">©</span>
+    </footer>
+  </div>
+
   <script src="assets/script.js"></script>
+  <script src="assets/app.js"></script>
 </body>
 </html>
