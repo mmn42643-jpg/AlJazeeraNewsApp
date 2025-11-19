@@ -1,23 +1,63 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f4f4f4;
+:root{
+  --bg:#ffffff; --text:#111; --card:#f6f8fb; --accent:#0b84ff;
+  --muted: rgba(0,0,0,0.6);
+  --radius:12px;
 }
-
-header {
-  background-color: #0066cc;
-  color: white;
-  padding: 1rem;
-  text-align: center;
+@media (prefers-color-scheme: dark){
+  :root { --bg:#0f1113; --text:#eee; --card:#181a1b; --accent:#1a73e8; --muted: rgba(255,255,255,0.7); }
 }
+.dark { --bg:#0f1113; --text:#eee; --card:#181a1b; --accent:#1a73e8; --muted: rgba(255,255,255,0.7); }
 
-nav button {
-  margin: 0.5rem;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Tajawal, Tahoma, Arial, sans-serif; background:var(--bg); color:var(--text); direction:rtl; font-size:16px; transition:background .18s,color .18s}
+.app{min-height:100vh;display:flex;flex-direction:column}
 
-main {
-  padding: 1rem;
+/* سبلاش */
+.splash{position:fixed;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--bg);z-index:9999}
+.loader{width:46px;height:46px;border:5px solid #e6e6e6;border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.splash p{margin-top:10px;color:var(--muted)}
+
+/* هيدر */
+.header{background:var(--accent); color:#fff; padding:12px 14px; display:flex; justify-content:space-between; align-items:center}
+.app-title{margin:0;font-size:20px}
+.top-buttons button{margin-left:8px;padding:6px 8px;border-radius:10px;border:0;background:rgba(255,255,255,0.12);color:#fff;cursor:pointer}
+
+/* تبويبات */
+.tabs{display:flex;background:var(--accent);position:sticky;top:0;z-index:10}
+.tab{flex:1;padding:12px;border:0;background:transparent;color:#fff;cursor:pointer;font-weight:600}
+.tab.active{background:rgba(255,255,255,0.18)}
+
+/* محتوى */
+.main{padding:12px;flex:1}
+.list{display:grid;grid-template-columns:1fr;gap:12px;max-width:1000px;margin:0 auto}
+
+/* بطاقة */
+.card{background:var(--card);border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.04);display:flex;flex-direction:column}
+.card .thumb{width:100%;height:180px;object-fit:cover;background:#ddd}
+.card-body{padding:12px}
+.card h3{margin:0 0 8px;font-size:18px}
+.card p{margin:0;color:var(--muted);line-height:1.45}
+
+/* أسفل البطاقة */
+.card-buttons{display:flex;justify-content:space-between;align-items:center;padding:10px}
+.action-btn{padding:8px 12px;border:0;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer}
+.favorite-btn{width:44px;height:44px;border-radius:50%;border:0;background:#fff;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+.favorite-btn.active{background:gold}
+
+/* صفحة المقال / مشغل */
+.article{padding:12px;max-width:900px;margin:0 auto}
+.article.hidden{display:none}
+.backBtn{display:inline-block;margin-bottom:10px;padding:8px 10px;border-radius:8px;border:0;background:var(--accent);color:#fff;cursor:pointer}
+.youtube-player{width:100%;aspect-ratio:16/9;border-radius:10px;background:#000;display:block}
+
+/* فوتر */
+.footer{text-align:center;padding:12px;opacity:0.95;font-size:13px}
+.footer .circ{display:inline-block;width:18px;height:18px;border-radius:50%;line-height:18px;text-align:center;border:1px solid var(--muted);margin-inline-start:6px}
+
+/* استجابة */
+@media(min-width:900px){
+  .list{grid-template-columns:repeat(2,1fr);gap:18px}
+  .card .thumb{height:220px}
 }
