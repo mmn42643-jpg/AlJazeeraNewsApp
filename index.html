@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,25 +7,9 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header id="header">
-    <h1>Al Jazeera News</h1>
-    <button id="themeToggle">🌙</button>
-  </header>
-
-  <nav>
-    <button class="tab active" data-tab="politics">أخبار السياسة</button>
-    <button class="tab" data-tab="youtube">فيديوهات اليوتيوب</button>
-  </nav>
-
-  <main>
-    <section id="politics" class="tab-content active"></section>
-    <section id="youtube" class="tab-content"></section>
-  </main>
-
-  <div id="articlePage" class="hidden">
-    <button id="closeArticle">إغلاق</button>
-    <div id="articleContent"></div>
-  </div>
+  <h1>تطبيق الأخبار</h1>
+  <div id="news-container"></div>
+  <div id="youtube-container"></div>
 
   <script src="assets/app.js"></script>
   <script src="assets/script.js"></script>
