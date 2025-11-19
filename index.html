@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html lang="ar">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AlJazeera News App</title>
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Al Jazeera News App</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <header>
-    <h1>أخبار الجزيرة</h1>
+    <h1>خدمة الأخبار تعمل بنجاح</h1>
+    <nav>
+      <button data-tab="politics">سياسة</button>
+      <button data-tab="sports">رياضة</button>
+      <button data-tab="technology">تكنولوجيا</button>
+      <button data-tab="youtube">يوتيوب</button>
+    </nav>
   </header>
-  <nav>
-    <button id="tab-news">الأخبار</button>
-    <button id="tab-youtube">يوتيوب</button>
-  </nav>
-  <main id="content"></main>
-
+  <main id="content">
+    <p>اختر قسمًا لعرض الأخبار</p>
+  </main>
   <script src="assets/app.js"></script>
   <script src="assets/script.js"></script>
 </body>
