@@ -1,5 +1,5 @@
 {
-  "name": "akhbar-mohand",
+  "name": "akhbar-mohannad",
   "version": "1.0.0",
   "main": "server.js",
   "type": "module",
@@ -10,6 +10,7 @@
     "cors": "^2.8.5",
     "express": "^4.18.2",
     "dotenv": "^16.4.5",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "rss-parser": "^3.12.0"
   }
 }
