@@ -19,26 +19,35 @@
   <header id="header" class="header">
     <img id="appLogo" src="img/logo-light.png" alt="Logo" class="app-logo">
     <h1 class="app-title">أخبار مهند</h1>
+
     <div class="header-controls">
-      <input type="text" id="searchInput" placeholder="بحث 🔎">
+      <div class="search-wrap">
+        <input type="text" id="searchInput" placeholder="بحث في العناوين والوصف...">
+        <button id="btn-search" class="icon-btn"><img id="searchIcon" src="img/search-light.png" alt="search" /></button>
+      </div>
+
       <div class="control-buttons">
-        <button id="themeToggle" title="وضع">🌙</button>
-        <button id="fontPlus" title="تكبير الخط">A+</button>
-        <button id="fontMinus" title="تصغير الخط">A-</button>
-        <button id="refreshBtn" title="تحديث">🔄</button>
+        <button id="refreshBtn" class="icon-btn" title="تحديث"><img id="refreshIcon" src="img/refresh-light.png" alt="refresh" /></button>
+
+        <button id="themeToggle" class="icon-btn" title="وضع"><img id="themeIcon" src="img/moon.png" alt="theme" /></button>
+
+        <button id="fontPlus" class="icon-btn" title="تكبير الخط"><img id="fontPlusIcon" src="img/font-plus-light.png" alt="A+" /></button>
+
+        <button id="fontMinus" class="icon-btn" title="تصغير الخط"><img id="fontMinusIcon" src="img/font-minus-light.png" alt="A-" /></button>
+
+        <button id="tabBurgerBtn" class="icon-btn" title="القائمة"><img id="menuIcon" src="img/menu-light.png" alt="menu" /></button>
       </div>
-      <div class="tab-selector">
-        <button id="tabBurgerBtn">☰</button>
-        <ul id="tabMenu" class="tab-menu hidden">
-          <li data-tab="politics">سياسية</li>
-          <li data-tab="breaking">عاجلة</li>
-          <li data-tab="general">عامة</li>
-          <li data-tab="youtube">يوتيوب</li>
-          <li data-tab="favorites">المفضلة</li>
-        </ul>
-      </div>
-      <p id="currentTabLabel">سياسية</p>
     </div>
+
+    <ul id="tabMenu" class="tab-menu hidden" aria-hidden="true">
+      <li data-tab="politics">سياسية</li>
+      <li data-tab="breaking">عاجلة</li>
+      <li data-tab="general">عامة</li>
+      <li data-tab="youtube">يوتيوب</li>
+      <li data-tab="favorites">المفضلة</li>
+    </ul>
+
+    <p id="currentTabLabel" class="current-tab">سياسية</p>
   </header>
 
   <!-- محتوى -->
