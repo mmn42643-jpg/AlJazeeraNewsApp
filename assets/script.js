@@ -1,60 +1,103 @@
-// helpers: escapeHtml and DOM helpers
-function escapeHtml(str){
-  return String(str || "").replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; });
+/* المفضلة */
+let fav = JSON.parse(localStorage.getItem("favorites")||"[]");
+
+function isFavorite(item){
+  return fav.some(f=>f.link===item.link);
 }
 
-function createCardElement(item, isFav=false){
-  const card = document.createElement("article");
-  card.className = "card";
-
-  if(item.img){
-    const img = document.createElement("img");
-    img.className = "thumb";
-    img.src = item.img;
-    img.alt = item.title || "image";
-    img.onerror = ()=> img.src = "https://via.placeholder.com/800x450?text=No+Image";
-    card.appendChild(img);
+function toggleFavorite(item){
+  if(isFavorite(item)){
+    fav = fav.filter(f=>f.link!==item.link);
+  } else {
+    fav.push(item);
   }
-
-  const body = document.createElement("div");
-  body.className = "card-body";
-  const h3 = document.createElement("h3");
-  h3.textContent = item.title || "";
-  const p = document.createElement("p");
-  p.innerHTML = item.contentSnippet || "";
-  body.appendChild(h3);
-  body.appendChild(p);
-  card.appendChild(body);
-
-  const footer = document.createElement("div");
-  footer.className = "card-buttons";
-
-  const readBtn = document.createElement("button");
-  readBtn.className = "action-btn";
-  readBtn.textContent = "قراءة الخبر";
-  readBtn.onclick = ()=> window.openArticleInApp(item);
-
-  const favBtn = document.createElement("button");
-  favBtn.className = "favorite-btn";
-  favBtn.title = "أضف للمفضلة";
-  favBtn.innerText = isFav ? "🌟" : "⭐";
-  if(isFav) favBtn.classList.add("active");
-
-  favBtn.onclick = (e)=> {
-    e.stopPropagation();
-    window.toggleFavByLink(item);
-    // toggle UI
-    if(window.isFavByItem(item)){
-      favBtn.classList.add("active");
-      favBtn.innerText = "🌟";
-    } else {
-      favBtn.classList.remove("active");
-      favBtn.innerText = "⭐";
-    }
-  };
-
-  footer.appendChild(readBtn);
-  footer.appendChild(favBtn);
-  card.appendChild(footer);
-  return card;
+  localStorage.setItem("favorites",JSON.stringify(fav));
 }
+
+function renderFavorites(){
+  if(fav.length===0){
+    content.innerHTML="<p>لا توجد عناصر في المفضلة</p>";
+    return;
+  }
+  renderNews(fav);
+}
+
+/* صفحة القراءة */
+const reader = document.getElementById("reader");
+const readerTitle = document.getElementById("readerTitle");
+const readerImg = document.getElementById("readerImg");
+const readerBody = document.getElementById("readerBody");
+
+document.getElementById("closeReader").onclick=()=>reader.classList.add("hidden");
+
+function openReader(item){
+  readerTitle.textContent = item.title;
+  readerImg.src = item.img || "img/no.jpg";
+  readerBody.innerHTML = item.content;
+  reader.classList.remove("hidden");
+}
+
+/* يوتيوب */
+async function loadYouTube(){
+  const res = await fetch("/youtube");
+  const data = await res.json();
+
+  content.innerHTML="";
+
+  data.forEach(v=>{
+    const card=document.createElement("div");
+    card.className="card";
+
+    card.innerHTML=`
+      <img src="${v.img}">
+      <div class="title">${v.title}</div>
+      <div class="snippet">${v.desc || ''}</div>
+      <div class="actions">
+        <button class="readBtn">تشغيل</button>
+        <button class="favBtn">⭐</button>
+      </div>
+    `;
+
+    // تشغيل الفيديو
+    card.querySelector(".readBtn").onclick=()=>openVideo(v.vid);
+
+    // مفضلة
+    card.querySelector(".favBtn").onclick=(e)=>{
+      toggleFavorite(v);
+      e.target.textContent = isFavorite(v) ? "🌟" : "⭐";
+    };
+
+    content.appendChild(card);
+  });
+}
+
+/* مشغل الفيديو */
+const videoPlayer = document.getElementById("videoPlayer");
+const videoFrame = document.getElementById("videoFrame");
+
+document.getElementById("closeVideo").onclick=()=>{
+  videoPlayer.classList.add("hidden");
+  videoFrame.src="";
+};
+
+function openVideo(id){
+  videoFrame.src = `https://www.youtube.com/embed/${id}`;
+  videoPlayer.classList.remove("hidden");
+}
+
+/* الوضع الليلي */
+const themeToggle = document.getElementById("themeToggle");
+themeToggle.onclick=()=>{
+  document.body.classList.toggle("dark");
+  themeToggle.textContent = document.body.classList.contains("dark") ? "☀️" : "🌙";
+};
+
+/* تكبير وتصغير الخط */
+let fz = 16;
+document.getElementById("fontPlus").onclick=()=>{
+  fz++; document.body.style.fontSize=`${fz}px`;
+};
+document.getElementById("fontMinus").onclick=()=>{
+  fz = Math.max(12, fz-1);
+  document.body.style.fontSize=`${fz}px`;
+};
