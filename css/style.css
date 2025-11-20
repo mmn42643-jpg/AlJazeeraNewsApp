@@ -11,18 +11,20 @@ body{margin:0;font-family:Tajawal,Arial,sans-serif;background:var(--bg);color:va
 .app-title{margin:0;font-size:24px;text-align:center;}
 
 .header-controls{width:100%;display:flex;flex-direction:column;align-items:center;margin-top:5px;}
-#searchInput{width:80%;padding:6px 8px;margin-bottom:5px;border-radius:8px;border:1px solid var(--accent);}
+.search-wrap{display:flex;gap:6px;align-items:center;width:80%;}
+#searchInput{flex:1;padding:6px 8px;margin-bottom:5px;border-radius:8px;border:1px solid var(--accent);}
+.icon-btn{display:inline-flex;align-items:center;justify-content:center;padding:6px;border-radius:8px;border:none;background:rgba(255,255,255,0.12);cursor:pointer;}
+.icon-btn img{width:20px;height:20px;display:block;}
+
 .control-buttons{display:flex;gap:8px;margin-bottom:5px;}
-.control-buttons button{padding:6px 8px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer;}
 
-.tab-selector{position:relative;}
-#tabBurgerBtn{padding:6px 10px;border:none;background:var(--accent);color:#fff;border-radius:6px;cursor:pointer;}
-.tab-menu{position:absolute;top:35px;right:0;background:var(--card);border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.2);list-style:none;padding:0;margin:0;z-index:100;}
-.tab-menu li{padding:8px 12px;cursor:pointer;}
-.tab-menu li:hover{background:var(--accent);color:#fff;}
+.tab-menu{position:relative;margin-top:8px;background:transparent;list-style:none;padding:0;display:flex;gap:10px;}
+.tab-menu li{cursor:pointer;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.12);}
+
 .hidden{display:none;}
-#currentTabLabel{margin:0;font-weight:bold;}
+.current-tab{margin:8px 0 0;font-weight:bold;color:var(--accent);}
 
+/* المحتوى والبطاقات */
 .main{padding:10px;flex:1;background:url("../img/page-bg-light.jpg") center/cover no-repeat; background-size:cover;}
 .dark .main{background:url("../img/page-bg-dark.jpg") center/cover no-repeat; background-size:cover;}
 .list{display:grid;gap:12px;grid-template-columns:1fr;max-width:1000px;margin:0 auto;}
