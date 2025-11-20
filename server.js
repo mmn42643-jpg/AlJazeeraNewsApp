@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import Parser from "rss-parser";
 import fetch from "node-fetch";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -10,70 +9,63 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const app = express();
 
+const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
-const rss = new Parser();
-
-/* جلب الأخبار */
-app.get("/news/:cat", async (req, res) => {
+// جلب الأخبار حسب التبويب
+app.get("/news/:category", async (req, res) => {
   try {
-    const cat = req.params.cat;
+    const cat = req.params.category;
+    let rssUrl =
+      cat === "politics" ? process.env.RSS_POLITICS :
+      cat === "breaking" ? process.env.RSS_BREAKING :
+      cat === "general" ? process.env.RSS_GENERAL :
+      null;
 
-    const urls = {
-      politics: process.env.RSS_POLITICS,
-      breaking: process.env.RSS_BREAKING,
-      general: process.env.RSS_GENERAL
-    };
+    if (!rssUrl) return res.json({ error: "قسم غير معروف" });
 
-    const url = urls[cat];
-    if (!url) return res.json([]);
+    const response = await fetch(rssUrl);
+    const data = await response.json();
+    if (!data.items) return res.json({ error: "لم يتم العثور على أخبار" });
 
-    const feed = await rss.parseURL(url);
-
-    const list = feed.items.map(i => ({
-      title: i.title,
-      desc: i.contentSnippet || "",
-      img: i.enclosure?.url || "",
-      link: i.link,
-      full: i["content:encoded"] || i.content || ""
-    }));
-
-    res.json(list.slice(0, 40));
-  } catch (e) {
-    res.json([]);
+    res.json(data.items);
+  } catch (err) {
+    console.error("News fetch error:", err);
+    res.json({ error: "تعذر جلب الأخبار" });
   }
 });
 
-/* يوتيوب */
+// جلب فيديوهات يوتيوب
 app.get("/youtube", async (req, res) => {
   try {
-    const api = process.env.YT_API_KEY;
-    const id = process.env.CHANNEL_ID;
+    const apiKey = process.env.YT_API_KEY;
+    const channelId = process.env.YOUTUBE_CHANNEL_ID;
+    if (!apiKey || !channelId) return res.status(400).json({ error: "YOUTUBE API_KEY أو CHANNEL_ID مفقود" });
 
-    const url = `https://www.googleapis.com/youtube/v3/search?key=${api}&channelId=${id}&part=snippet&maxResults=20&type=video`;
-
+    const url = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&part=snippet,id&order=date&maxResults=12&type=video`;
     const r = await fetch(url);
     const j = await r.json();
-
-    const list = j.items.map(v => ({
-      title: v.snippet.title,
-      desc: v.snippet.description,
-      img: v.snippet.thumbnails.high.url,
-      vid: v.id.videoId
+    const items = (j.items || []).map(it => ({
+      title: it.snippet.title,
+      link: `https://www.youtube.com/watch?v=${it.id.videoId}`,
+      vid: it.id.videoId,
+      img: it.snippet.thumbnails?.high?.url || it.snippet.thumbnails?.medium?.url || "",
+      description: it.snippet.description
     }));
-
-    res.json(list);
-  } catch {
-    res.json([]);
+    res.json(items);
+  } catch (err) {
+    console.error("YouTube error:", err);
+    res.status(500).json({ error: "تعذر جلب فيديوهات اليوتيوب" });
   }
 });
 
+// أي رابط آخر يرسل index.html
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-app.listen(process.env.PORT || 3000);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
