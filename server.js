@@ -1,77 +1,91 @@
-// server.js (محدث)
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import fetch from "node-fetch";
+import Parser from "rss-parser";
 import path from "path";
 import { fileURLToPath } from "url";
+import fetch from "node-fetch";
 
 dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-// Serve static files from project root (index.html, css/, assets/, img/)
 app.use(express.static(path.join(__dirname)));
 
-// Endpoint: get news by category (politics, breaking, aljazeera)
-app.get("/news/:category", async (req, res) => {
-  try {
-    const cat = req.params.category;
+const rss = new Parser();
 
-    let rssUrl =
-      cat === "politics" ? process.env.RSS_POLITICS :
-      cat === "breaking" ? process.env.RSS_BREAKING :
-      cat === "aljazeera" ? process.env.RSS_ALJAZEERA :
-      null;
+function rssUrl(cat){
+  if(cat==="politics") return process.env.RSS_POLITICS;
+  if(cat==="breaking") return process.env.RSS_BREAKING;
+  if(cat==="general") return process.env.RSS_GENERAL;
+  return null;
+}
 
-    if (!rssUrl) return res.json({ error: "قسم غير معروف" });
+function extractImage(item){
+  if(item.enclosure?.url) return item.enclosure.url;
+  if(item["media:content"]?.$?.url) return item["media:content"].$?.url;
+  if(item["media:thumbnail"]?.url) return item["media:thumbnail"].url;
 
-    const response = await fetch(rssUrl);
-    const data = await response.json();
+  const html = item.content || item["content:encoded"] || "";
+  const m = html.match(/<img[^>]+src=["']([^"']+)["']/);
+  return m ? m[1] : null;
+}
 
-    if (!data.items) {
-      return res.json({ error: "لم يتم العثور على أخبار" });
-    }
+app.get("/news/:cat", async (req,res)=>{
+  try{
+    const url = rssUrl(req.params.cat);
+    if(!url) return res.json([]);
 
-    res.json(data.items);
-  } catch (err) {
-    console.error("News fetch error:", err);
-    res.json({ error: "تعذر جلب الأخبار" });
+    const feed = await rss.parseURL(url);
+    const seen = new Set();
+    const items = feed.items.map(it=>{
+      const img = extractImage(it);
+      return {
+        title: it.title || "",
+        link: it.link || "",
+        content: it["content:encoded"] || it.content || "",
+        contentSnippet: (it.contentSnippet || "").slice(0,220),
+        img
+      };
+    }).filter(i=>{
+      if(!i.link || seen.has(i.link)) return false;
+      seen.add(i.link);
+      return true;
+    }).slice(0,30);
+
+    res.json(items);
+  }catch(err){
+    res.json([]);
   }
 });
 
-// Endpoint: Simple YouTube fetch using API key (optional)
-app.get("/youtube", async (req, res) => {
-  try {
-    const apiKey = process.env.YT_API_KEY;
-    const channelId = process.env.CHANNEL_ID;
-    if (!apiKey || !channelId) return res.status(400).json({ error: "YOUTUBE API_KEY أو CHANNEL_ID مفقود" });
-    const url = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&part=snippet,id&order=date&maxResults=12&type=video`;
+/* يوتيوب الجزيرة */
+app.get("/youtube", async (req,res)=>{
+  try{
+    const url = `https://www.googleapis.com/youtube/v3/search?key=${process.env.YT_API}&channelId=${process.env.ALJAZEERA}&part=snippet,id&type=video&maxResults=12`;
+
     const r = await fetch(url);
     const j = await r.json();
-    // map to a compact structure
-    const items = (j.items || []).map(it => ({
-      title: it.snippet.title,
-      link: `https://www.youtube.com/watch?v=${it.id.videoId}`,
-      vid: it.id.videoId,
-      img: it.snippet.thumbnails?.high?.url || it.snippet.thumbnails?.medium?.url || ""
+
+    const items = (j.items || []).map(v=>({
+      title:v.snippet.title,
+      desc:v.snippet.description,
+      img:v.snippet.thumbnails.high.url,
+      vid:v.id.videoId,
+      link:`https://www.youtube.com/watch?v=${v.id.videoId}`
     }));
+
     res.json(items);
-  } catch (err) {
-    console.error("YouTube error:", err);
-    res.status(500).json({ error: "تعذر جلب فيديوهات اليوتيوب" });
+  }catch(err){
+    res.json([]);
   }
 });
 
-// Serve index.html for any other route (SPA)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
-});
+app.get("*",(req,res)=>
+  res.sendFile(path.join(__dirname,"index.html"))
+);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(3000,()=>console.log("SERVER READY"));
