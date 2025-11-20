@@ -20,7 +20,7 @@ function createCardElement(item, isFav=false, type="news"){
   const h3=document.createElement("h3");
   h3.textContent=item.title||"";
   const p=document.createElement("p");
-  p.textContent=item.contentSnippet||item.description||"";
+  p.innerHTML=item.contentSnippet || item.description || "";
   body.appendChild(h3);
   body.appendChild(p);
   card.appendChild(body);
