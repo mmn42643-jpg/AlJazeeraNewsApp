@@ -2,93 +2,78 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import Parser from "rss-parser";
+import fetch from "node-fetch";
 import path from "path";
 import { fileURLToPath } from "url";
-import fetch from "node-fetch";
 
 dotenv.config();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
 const rss = new Parser();
 
-// الدوال المساعدة
-function extractImage(item) {
-  if (item.enclosure?.url) return item.enclosure.url;
-  if (item["media:content"]?.$?.url) return item["media:content"].$?.url;
-  if (item["media:thumbnail"]?.url) return item["media:thumbnail"].url;
-  const html = item.content || item["content:encoded"] || "";
-  const m = html.match(/<img[^>]+src=["']([^"']+)["']/);
-  return m ? m[1] : null;
-}
-
+/* جلب الأخبار */
 app.get("/news/:cat", async (req, res) => {
   try {
     const cat = req.params.cat;
-    const url = process.env.RSS_POLITICS; // نستخدم نفس المصدر أولاً
-    if (!url) return res.status(400).json({ error: "RSS غير معرف" });
+
+    const urls = {
+      politics: process.env.RSS_POLITICS,
+      breaking: process.env.RSS_BREAKING,
+      general: process.env.RSS_GENERAL
+    };
+
+    const url = urls[cat];
+    if (!url) return res.json([]);
 
     const feed = await rss.parseURL(url);
-    let items = feed.items.map(it => ({
-      title: it.title || "",
-      link: it.link || "",
-      content: it["content:encoded"] || it.content || "",
-      contentSnippet: it.contentSnippet || "",
-      img: extractImage(it)
+
+    const list = feed.items.map(i => ({
+      title: i.title,
+      desc: i.contentSnippet || "",
+      img: i.enclosure?.url || "",
+      link: i.link,
+      full: i["content:encoded"] || i.content || ""
     }));
 
-    // ترشيح حسب الفئة
-    if (cat === "politics") {
-      items = items.filter(i => /سياسة|politic/i.test(i.title + i.content));
-    } else if (cat === "breaking") {
-      items = items.filter(i => /عاجل|breaking/i.test(i.title + i.content));
-    } else if (cat === "general") {
-      // عام = ما يقع في الفئتين السابقين
-      items = items.filter(i => !(/سياسة|عاجل|breaking|politic/i.test(i.title + i.content)));
-    }
-
-    res.json(items.slice(0, 30));
-  } catch (err) {
-    console.error("RSS error:", err);
-    res.status(500).json({ error: "تعذر جلب الأخبار" });
+    res.json(list.slice(0, 40));
+  } catch (e) {
+    res.json([]);
   }
 });
 
-// تبويب يوتيوب
+/* يوتيوب */
 app.get("/youtube", async (req, res) => {
   try {
-    const apiKey = process.env.YT_API;
-    const channelId = process.env.ALJAZEERA_CHANNEL_ID;
-    if (!apiKey || !channelId) return res.status(400).json({ error: "مفتاح YouTube أو CHANNEL_ID مفقود" });
+    const api = process.env.YT_API_KEY;
+    const id = process.env.CHANNEL_ID;
 
-    const url = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&part=snippet,id&maxResults=12&type=video`;
+    const url = `https://www.googleapis.com/youtube/v3/search?key=${api}&channelId=${id}&part=snippet&maxResults=20&type=video`;
+
     const r = await fetch(url);
     const j = await r.json();
 
-    const items = (j.items || []).map(it => ({
-      title: it.snippet.title,
-      desc: it.snippet.description,
-      img: it.snippet.thumbnails.high?.url || it.snippet.thumbnails.default?.url,
-      vid: it.id.videoId,
-      link: `https://www.youtube.com/watch?v=${it.id.videoId}`
+    const list = j.items.map(v => ({
+      title: v.snippet.title,
+      desc: v.snippet.description,
+      img: v.snippet.thumbnails.high.url,
+      vid: v.id.videoId
     }));
 
-    res.json(items);
-  } catch (err) {
-    console.error("YouTube error:", err);
-    res.status(500).json({ error: "تعذر جلب فيديوهات" });
+    res.json(list);
+  } catch {
+    res.json([]);
   }
 });
 
-// بقية الطلبات توجه إلى index.html
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(process.env.PORT || 3000);
