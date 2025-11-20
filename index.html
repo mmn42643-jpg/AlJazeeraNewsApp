@@ -3,47 +3,55 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>أخبار - مهند ظاهر</title>
+  <title>الأخبار</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
-  <div id="app" class="app">
-    <div id="splash" class="splash">
-      <div class="loader"></div>
-      <p>جاري التحميل...</p>
+
+  <!-- الهيدر -->
+  <header class="header">
+    <div class="logo">📰 الأخبار</div>
+
+    <div class="actions">
+      <button id="themeToggle">🌙☀️</button>
+      <button id="fontPlus">A+</button>
+      <button id="fontMinus">A-</button>
     </div>
+  </header>
 
-    <header id="header" class="header">
-      <h1 class="app-title">أخبار</h1>
-      <div class="top-buttons">
-        <button id="themeToggle" title="وضع">🌙</button>
-        <button id="fontPlus" title="تكبير الخط">A+</button>
-        <button id="fontMinus" title="تصغير الخط">A-</button>
-        <button id="refreshBtn" title="تحديث">🔄</button>
-      </div>
-    </header>
+  <!-- التبويبات -->
+  <nav class="tabs">
+    <button data-tab="politics" class="active">أخبار سياسية</button>
+    <button data-tab="breaking">أخبار عاجلة</button>
+    <button data-tab="general">أخبار عامة</button>
+    <button data-tab="youtube">يوتيوب</button>
+    <button data-tab="favorites">المفضلة ⭐</button>
+  </nav>
 
-    <nav class="tabs" role="tablist">
-      <button class="tab active" data-tab="politics">أخبار سياسية</button>
-      <button class="tab" data-tab="breaking">أخبار عاجلة</button>
-      <button class="tab" data-tab="aljazeera">أخبار قناة الجزيرة</button>
-      <button class="tab" data-tab="favorites">المفضلة</button>
-    </nav>
+  <!-- المحتوى -->
+  <main id="content"></main>
 
-    <main class="main">
-      <section id="list" class="list" aria-live="polite"></section>
-      <section id="articlePage" class="article hidden" aria-hidden="true">
-        <button id="closeArticle" class="backBtn">رجوع</button>
-        <div id="articleContent"></div>
-      </section>
-    </main>
-
-    <footer class="footer">
-      © جميع الحقوق محفوظة لـِ مهند ظاهر 2025 <span class="circ">©</span>
-    </footer>
+  <!-- صفحة القراءة -->
+  <div id="reader" class="hidden">
+    <button id="closeReader">رجوع</button>
+    <h2 id="readerTitle"></h2>
+    <img id="readerImg" />
+    <div id="readerBody"></div>
   </div>
 
-  <script src="assets/helpers.js"></script>
-  <script src="assets/app.js"></script>
+  <!-- مشغل الفيديو -->
+  <div id="videoPlayer" class="hidden">
+    <button id="closeVideo">إغلاق</button>
+    <iframe id="videoFrame" allowfullscreen></iframe>
+  </div>
+
+  <!-- الفوتر -->
+  <footer>
+    <p>© جميع الحقوق محفوظة لـِ مهند ظاهر 2025</p>
+  </footer>
+
+<script src="assets/app.js"></script>
+<script src="assets/script.js"></script>
 </body>
 </html>
