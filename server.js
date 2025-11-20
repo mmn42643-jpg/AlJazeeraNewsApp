@@ -17,75 +17,78 @@ app.use(express.static(path.join(__dirname)));
 
 const rss = new Parser();
 
-function rssUrl(cat){
-  if(cat==="politics") return process.env.RSS_POLITICS;
-  if(cat==="breaking") return process.env.RSS_BREAKING;
-  if(cat==="general") return process.env.RSS_GENERAL;
-  return null;
-}
-
-function extractImage(item){
-  if(item.enclosure?.url) return item.enclosure.url;
-  if(item["media:content"]?.$?.url) return item["media:content"].$?.url;
-  if(item["media:thumbnail"]?.url) return item["media:thumbnail"].url;
-
+// الدوال المساعدة
+function extractImage(item) {
+  if (item.enclosure?.url) return item.enclosure.url;
+  if (item["media:content"]?.$?.url) return item["media:content"].$?.url;
+  if (item["media:thumbnail"]?.url) return item["media:thumbnail"].url;
   const html = item.content || item["content:encoded"] || "";
   const m = html.match(/<img[^>]+src=["']([^"']+)["']/);
   return m ? m[1] : null;
 }
 
-app.get("/news/:cat", async (req,res)=>{
-  try{
-    const url = rssUrl(req.params.cat);
-    if(!url) return res.json([]);
+app.get("/news/:cat", async (req, res) => {
+  try {
+    const cat = req.params.cat;
+    const url = process.env.RSS_POLITICS; // نستخدم نفس المصدر أولاً
+    if (!url) return res.status(400).json({ error: "RSS غير معرف" });
 
     const feed = await rss.parseURL(url);
-    const seen = new Set();
-    const items = feed.items.map(it=>{
-      const img = extractImage(it);
-      return {
-        title: it.title || "",
-        link: it.link || "",
-        content: it["content:encoded"] || it.content || "",
-        contentSnippet: (it.contentSnippet || "").slice(0,220),
-        img
-      };
-    }).filter(i=>{
-      if(!i.link || seen.has(i.link)) return false;
-      seen.add(i.link);
-      return true;
-    }).slice(0,30);
+    let items = feed.items.map(it => ({
+      title: it.title || "",
+      link: it.link || "",
+      content: it["content:encoded"] || it.content || "",
+      contentSnippet: it.contentSnippet || "",
+      img: extractImage(it)
+    }));
 
-    res.json(items);
-  }catch(err){
-    res.json([]);
+    // ترشيح حسب الفئة
+    if (cat === "politics") {
+      items = items.filter(i => /سياسة|politic/i.test(i.title + i.content));
+    } else if (cat === "breaking") {
+      items = items.filter(i => /عاجل|breaking/i.test(i.title + i.content));
+    } else if (cat === "general") {
+      // عام = ما يقع في الفئتين السابقين
+      items = items.filter(i => !(/سياسة|عاجل|breaking|politic/i.test(i.title + i.content)));
+    }
+
+    res.json(items.slice(0, 30));
+  } catch (err) {
+    console.error("RSS error:", err);
+    res.status(500).json({ error: "تعذر جلب الأخبار" });
   }
 });
 
-/* يوتيوب الجزيرة */
-app.get("/youtube", async (req,res)=>{
-  try{
-    const url = `https://www.googleapis.com/youtube/v3/search?key=${process.env.YT_API}&channelId=${process.env.ALJAZEERA}&part=snippet,id&type=video&maxResults=12`;
+// تبويب يوتيوب
+app.get("/youtube", async (req, res) => {
+  try {
+    const apiKey = process.env.YT_API;
+    const channelId = process.env.ALJAZEERA_CHANNEL_ID;
+    if (!apiKey || !channelId) return res.status(400).json({ error: "مفتاح YouTube أو CHANNEL_ID مفقود" });
 
+    const url = `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&channelId=${channelId}&part=snippet,id&maxResults=12&type=video`;
     const r = await fetch(url);
     const j = await r.json();
 
-    const items = (j.items || []).map(v=>({
-      title:v.snippet.title,
-      desc:v.snippet.description,
-      img:v.snippet.thumbnails.high.url,
-      vid:v.id.videoId,
-      link:`https://www.youtube.com/watch?v=${v.id.videoId}`
+    const items = (j.items || []).map(it => ({
+      title: it.snippet.title,
+      desc: it.snippet.description,
+      img: it.snippet.thumbnails.high?.url || it.snippet.thumbnails.default?.url,
+      vid: it.id.videoId,
+      link: `https://www.youtube.com/watch?v=${it.id.videoId}`
     }));
 
     res.json(items);
-  }catch(err){
-    res.json([]);
+  } catch (err) {
+    console.error("YouTube error:", err);
+    res.status(500).json({ error: "تعذر جلب فيديوهات" });
   }
 });
 
-app.get("*",(req,res)=>
-  res.sendFile(path.join(__dirname,"index.html"))
-);
+// بقية الطلبات توجه إلى index.html
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
 
-app.listen(3000,()=>console.log("SERVER READY"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
