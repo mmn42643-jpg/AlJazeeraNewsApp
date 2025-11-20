@@ -1,155 +1,156 @@
-// عناصر
+let currentTab = "politics";
+let fontSize = 1;
+let favorites = JSON.parse(localStorage.getItem("fav") || "[]");
+
 const content = document.getElementById("content");
-const tabs = document.querySelectorAll(".tabs button");
-const themeToggle = document.getElementById("themeToggle");
-const fontPlus = document.getElementById("fontPlus");
-const fontMinus = document.getElementById("fontMinus");
+const reader = document.getElementById("reader");
+const readerContent = document.getElementById("reader-content");
+const videoSec = document.getElementById("video-player");
+const videoFrame = document.getElementById("video-frame");
 
-let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-let fontSize = parseInt(localStorage.getItem("fontSize") || "16");
-
-// تفعيل الوضع حسب نظام الجهاز أولاً
-if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-  document.body.classList.add("dark");
-  themeToggle.textContent = "☀️";
-} else {
-  themeToggle.textContent = "🌙";
+function saveFav() {
+  localStorage.setItem("fav", JSON.stringify(favorites));
 }
 
-// أحداث التبويبات
-tabs.forEach(btn => {
-  btn.addEventListener("click", () => {
-    tabs.forEach(b => b.classList.remove("active"));
-    btn.classList.add("active");
-    loadTab(btn.dataset.tab);
-  });
-});
+function toggleFav(item) {
+  const exists = favorites.find(f => f.link === item.link || f.vid === item.vid);
+  if (exists) favorites = favorites.filter(f => f.link !== item.link && f.vid !== item.vid);
+  else favorites.push(item);
+  saveFav();
+  loadTab(currentTab);
+}
 
-// تغيير الثيم
-themeToggle.onclick = () => {
-  document.body.classList.toggle("dark");
-  const isDark = document.body.classList.contains("dark");
-  themeToggle.textContent = isDark ? "☀️" : "🌙";
-  localStorage.setItem("theme", isDark ? "dark" : "light");
-};
-
-// تكبير / تصغير الخط
-fontPlus.onclick = () => {
-  fontSize++;
-  document.body.style.fontSize = fontSize + "px";
-  localStorage.setItem("fontSize", fontSize);
-};
-fontMinus.onclick = () => {
-  fontSize = Math.max(12, fontSize - 1);
-  document.body.style.fontSize = fontSize + "px";
-  localStorage.setItem("fontSize", fontSize);
-};
-document.body.style.fontSize = fontSize + "px";
-
-// وظائف مفضلة
-function isFavorite(item) {
+function isFav(item) {
   return favorites.some(f => f.link === item.link || f.vid === item.vid);
 }
-function toggleFavorite(item) {
-  if (isFavorite(item)) {
-    favorites = favorites.filter(f => !(f.link === item.link || f.vid === item.vid));
-  } else {
-    favorites.push(item);
-  }
-  localStorage.setItem("favorites", JSON.stringify(favorites));
-}
 
-// تحميل الأخبار
 async function loadTab(tab) {
+  currentTab = tab;
+  document.querySelector(".current-tab").innerText =
+    tab === "politics" ? "سياسية" :
+    tab === "breaking" ? "عاجلة" :
+    tab === "general" ? "عامة" :
+    tab === "youtube" ? "يوتيوب" :
+    "المفضلة";
+
   if (tab === "favorites") {
     renderCards(favorites);
     return;
   }
-  if (tab === "youtube") {
-    const res = await fetch("/youtube");
-    const data = await res.json();
-    renderCards(data, true);
-    return;
-  }
 
-  const res = await fetch(`/news/${tab}`);
-  const data = await res.json();
+  const url = tab === "youtube" ? "/youtube" : `/news/${tab}`;
+  const r = await fetch(url);
+  const data = await r.json();
   renderCards(data);
 }
 
-// رسم البطاقات (خبر أو فيديو)
-function renderCards(items, isVideo = false) {
+function renderCards(list) {
   content.innerHTML = "";
-  items.forEach(item => {
+
+  list.forEach(item => {
     const card = document.createElement("div");
     card.className = "card";
 
-    const img = document.createElement("img");
-    img.src = item.img || "";
-    card.appendChild(img);
+    card.innerHTML = `
+      <img src="${item.img}" onerror="this.style.display='none'">
+      <div class="card-title">${item.title}</div>
+      <div class="card-desc">${item.desc?.slice(0,150)}...</div>
 
-    const title = document.createElement("div");
-    title.className = "title";
-    title.textContent = item.title;
-    card.appendChild(title);
+      <div class="card-actions">
+        ${item.vid ?
+          `<button onclick="openVideo('${item.vid}')">تشغيل</button>` :
+          `<button onclick='openReader(${JSON.stringify(item)})'>قراءة</button>`
+        }
 
-    const snippet = document.createElement("div");
-    snippet.className = "snippet";
-    snippet.textContent = isVideo ? item.desc : item.contentSnippet;
-    card.appendChild(snippet);
+        <button onclick='toggleFav(${JSON.stringify(item)})'>
+          ${isFav(item) ? "🌟" : "⭐️"}
+        </button>
+      </div>
+    `;
 
-    const actions = document.createElement("div");
-    actions.className = "actions";
-
-    const readBtn = document.createElement("button");
-    readBtn.className = "readBtn";
-    readBtn.textContent = isVideo ? "تشغيل" : "قراءة";
-    readBtn.onclick = () => {
-      if (isVideo) {
-        openVideo(item.vid);
-      } else {
-        openReader(item);
-      }
-    };
-    actions.appendChild(readBtn);
-
-    const favBtn = document.createElement("button");
-    favBtn.className = "favBtn";
-    favBtn.textContent = isFavorite(item) ? "🌟" : "⭐️";
-    favBtn.onclick = (e) => {
-      e.stopPropagation();
-      toggleFavorite(item);
-      favBtn.textContent = isFavorite(item) ? "🌟" : "⭐️";
-    };
-    actions.appendChild(favBtn);
-
-    card.appendChild(actions);
     content.appendChild(card);
   });
 }
 
-// فتح صفحة قراءة
-const reader = document.getElementById("reader");
-const readerTitle = document.getElementById("readerTitle");
-const readerImg = document.getElementById("readerImg");
-const readerBody = document.getElementById("readerBody");
-document.getElementById("closeReader").onclick = () => reader.classList.add("hidden");
-
 function openReader(item) {
-  readerTitle.textContent = item.title;
-  readerImg.src = item.img || "";
-  readerBody.innerHTML = item.content;
   reader.classList.remove("hidden");
+  readerContent.innerHTML = item.full || "";
 }
 
-// تشغيل فيديو
-const videoPlayer = document.getElementById("videoPlayer");
-const videoFrame = document.getElementById("videoFrame");
-document.getElementById("closeVideo").onclick = () => {
-  videoPlayer.classList.add("hidden");
+document.getElementById("close-reader").onclick = () => {
+  reader.classList.add("hidden");
+};
+
+function openVideo(id) {
+  videoFrame.src = `https://www.youtube.com/embed/${id}`;
+  videoSec.classList.remove("hidden");
+}
+
+document.getElementById("close-video").onclick = () => {
+  videoSec.classList.add("hidden");
   videoFrame.src = "";
 };
-function openVideo(vid) {
-  videoFrame.src = `https://www.youtube.com/embed/${vid}`;
-  videoPlayer.classList.remove("hidden");
-}
+
+/* -----------------------------------------------
+   بحث
+------------------------------------------------*/
+document.getElementById("btn-search-toggle").onclick = () => {
+  document.getElementById("search-bar").classList.toggle("hidden");
+};
+
+document.getElementById("search-input").oninput = (e) => {
+  const t = e.target.value.trim();
+  if (!t) return loadTab(currentTab);
+
+  const cards = [...content.children];
+  cards.forEach(c => {
+    let title = c.querySelector(".card-title").innerText;
+    let desc = c.querySelector(".card-desc").innerText;
+    c.style.display = (title.includes(t) || desc.includes(t)) ? "block" : "none";
+  });
+};
+
+/* -----------------------------------------------
+   ثيم
+------------------------------------------------*/
+document.getElementById("btn-theme").onclick = () => {
+  document.body.classList.toggle("dark");
+  document.getElementById("theme-icon").src =
+    document.body.classList.contains("dark")
+      ? "img/icon-sun.png"
+      : "img/icon-moon.png";
+};
+
+/* -----------------------------------------------
+   تكبير وتصغير
+------------------------------------------------*/
+document.getElementById("btn-font-plus").onclick = () => {
+  fontSize += 0.1;
+  document.body.style.fontSize = fontSize + "em";
+};
+
+document.getElementById("btn-font-minus").onclick = () => {
+  fontSize -= 0.1;
+  document.body.style.fontSize = fontSize + "em";
+};
+
+/* -----------------------------------------------
+   تحديث
+------------------------------------------------*/
+document.getElementById("btn-refresh").onclick = () => {
+  loadTab(currentTab);
+};
+
+/* -----------------------------------------------
+   قائمة البرغر
+------------------------------------------------*/
+document.querySelector(".burger-btn").onclick = () => {
+  document.getElementById("side-menu").classList.toggle("hidden");
+};
+
+document.querySelectorAll("#side-menu li").forEach(li => {
+  li.onclick = () => {
+    loadTab(li.dataset.tab);
+    document.getElementById("side-menu").classList.add("hidden");
+  };
+});
