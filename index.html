@@ -1,71 +1,62 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>أخبار مهند</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
+<div id="app" class="app">
 
-  <!-- الهيدر -->
-  <header>
-    <img src="img/logo.png" class="app-logo" alt="">
+  <!-- سبلاش -->
+  <div id="splash" class="splash">
+    <div class="loader"></div>
+    <p>جاري التحميل...</p>
+  </div>
+
+  <!-- هيدر -->
+  <header id="header" class="header">
+    <img id="appLogo" src="img/logo-light.png" alt="Logo" class="app-logo">
     <h1 class="app-title">أخبار مهند</h1>
-
-    <!-- أزرار التحكم -->
     <div class="header-controls">
-      <button id="btn-refresh">🔄</button>
-      <button id="btn-theme"><img id="theme-icon" src="img/icon-moon.png"></button>
-      <button id="btn-font-plus">A+</button>
-      <button id="btn-font-minus">A-</button>
-      <button id="btn-search-toggle">🔎</button>
+      <input type="text" id="searchInput" placeholder="بحث 🔎">
+      <div class="control-buttons">
+        <button id="themeToggle" title="وضع">🌙</button>
+        <button id="fontPlus" title="تكبير الخط">A+</button>
+        <button id="fontMinus" title="تصغير الخط">A-</button>
+        <button id="refreshBtn" title="تحديث">🔄</button>
+      </div>
+      <div class="tab-selector">
+        <button id="tabBurgerBtn">☰</button>
+        <ul id="tabMenu" class="tab-menu hidden">
+          <li data-tab="politics">سياسية</li>
+          <li data-tab="breaking">عاجلة</li>
+          <li data-tab="general">عامة</li>
+          <li data-tab="youtube">يوتيوب</li>
+          <li data-tab="favorites">المفضلة</li>
+        </ul>
+      </div>
+      <p id="currentTabLabel">سياسية</p>
     </div>
-
-    <!-- شريط البحث -->
-    <div id="search-bar" class="hidden">
-      <input id="search-input" placeholder="ابحث في العناوين والوصف...">
-    </div>
-
-    <!-- قائمة البرغر -->
-    <button class="burger-btn">☰</button>
-
-    <nav id="side-menu" class="hidden">
-      <ul>
-        <li data-tab="politics">سياسية</li>
-        <li data-tab="breaking">عاجلة</li>
-        <li data-tab="general">عامة</li>
-        <li data-tab="youtube">يوتيوب</li>
-        <li data-tab="favorites">المفضلة</li>
-      </ul>
-    </nav>
-
-    <!-- اسم التبويب المختار -->
-    <div class="current-tab">سياسية</div>
   </header>
 
-  <!-- منطقة عرض المحتوى -->
-  <main id="content"></main>
+  <!-- محتوى -->
+  <main class="main">
+    <section id="list" class="list" aria-live="polite"></section>
 
-  <!-- صفحة قراءة خبر -->
-  <section id="reader" class="hidden">
-    <button id="close-reader">رجوع</button>
-    <div id="reader-content"></div>
-  </section>
+    <section id="articlePage" class="article hidden" aria-hidden="true">
+      <button id="closeArticle" class="backBtn">رجوع</button>
+      <div id="articleContent"></div>
+    </section>
+  </main>
 
-  <!-- مشغل فيديو -->
-  <section id="video-player" class="hidden">
-    <button id="close-video">إغلاق</button>
-    <iframe id="video-frame" allowfullscreen></iframe>
-  </section>
-
-  <!-- الفوتر -->
-  <footer>
-    © جميع الحقوق محفوظة لـِ مهند ظاهر 2025
+  <footer class="footer">
+    © جميع الحقوق محفوظة لـِ مهند ظاهر 2025 <span class="circ">©</span>
   </footer>
+</div>
 
-  <script src="assets/app.js"></script>
-  <script src="assets/script.js"></script>
+<script src="assets/script.js"></script>
+<script src="assets/app.js"></script>
 </body>
 </html>
